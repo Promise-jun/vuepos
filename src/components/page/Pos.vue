@@ -10,7 +10,7 @@
     					<el-table-column prop="price" label="金额"></el-table-column>
     					<el-table-column label="操作" fixed="right">
     						<template scope="scope">
-    							<el-button type="text" size="small">删除</el-button>
+    							<el-button type="text" size="small" @click="delSingleGoods(scope.row)">删除</el-button>
     							<el-button type="text" size="small" @click="addOrderList(scope.row)">增加</el-button>
     						</template>
     					</el-table-column>
@@ -22,8 +22,8 @@
     				</div>
     				<div class="div-btn">
     					<el-button type="warning">挂单</el-button>
-    					<el-button type="danger">删除</el-button>
-    					<el-button type="success">结账</el-button>
+    					<el-button type="danger" @click="delAllGoods">删除</el-button>
+    					<el-button type="success" @click="checkout">结账</el-button>
     				</div>
     			</el-tab-pane>
     			<el-tab-pane label="挂单">
@@ -138,17 +138,13 @@ export default {
   },
   methods: {
   	addOrderList(goods) {
-
-  		this.totalCount = 0;
-  		this.totalMoney = 0;
-
   		let isHave = false;
   		for (var i = 0; i < this.tableData.length; i++) {
   			if (this.tableData[i].goodsId == goods.goodsId) {
   				isHave = true;
   			}
   		}
-
+  		
   		if (isHave) {
   			let arr = this.tableData.filter(o=>o.goodsId == goods.goodsId);
   			arr[0].count++;
@@ -161,11 +157,40 @@ export default {
   			}
   			this.tableData.push(newGoods);
   		}
-
-  		this.tableData.forEach((element) => {
-  			this.totalCount += element.count;
-  			this.totalMoney += element.count * element.price;
-  		})
+  		// 计算数量和金额
+  		this.getAllMoney();
+  	},
+  	delSingleGoods(goods) {
+  		this.tableData = this.tableData.filter(o => o.goodsId != goods.goodsId);
+  		// 计算数量和金额
+  		this.getAllMoney();
+  	},
+  	delAllGoods() {
+  		this.tableData = [];
+  		this.totalCount = 0;
+  		this.totalMoney = 0;
+  	},
+  	// 模拟结账
+  	checkout() {
+  		if (this.totalCount != 0) {
+  			this.delAllGoods();
+  			this.$message({
+  				message: '恭喜您！结账成功！',
+  				type: 'success'
+  			})
+  		} else {
+  			this.$message.error('抱歉！您还没有选择任何商品哦！')
+  		}
+  	},
+  	getAllMoney() {
+  		this.totalCount = 0;
+  		this.totalMoney = 0;
+  		if (this.tableData) {
+  			this.tableData.forEach((element) => {
+	  			this.totalCount += element.count;
+	  			this.totalMoney += element.count * element.price;
+	  		})
+  		}
   	}
   }
 }
